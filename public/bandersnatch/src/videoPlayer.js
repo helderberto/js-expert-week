@@ -57,6 +57,18 @@ class VideoMediaPlayer {
     this.activeItem = this.selected;
   }
 
+  async currentFileResolution() {
+    const LOWEST_RESOLUTION = 144;
+    const prepareUrl = {
+      url: this.manifestJSON.finalizar.url,
+      fileResolution: LOWEST_RESOLUTION,
+      fileResolutionTag: this.manifestJSON.fileResolutionTag,
+      hostTag: this.manifestJSON.hostTag,
+    };
+    const url = this.network.parseManifestUrl(prepareUrl);
+    return this.network.getProperResolution(url);
+  }
+
   async nextChunk(data) {
     const key = data.toLowerCase();
     const selected = this.manifestJSON[key];
@@ -66,14 +78,17 @@ class VideoMediaPlayer {
       at: parseInt(this.videoElement.currentTime + selected.at),
     };
 
+    // run video when download is running in background
     this.videoElement.play();
     await this.fileDownload(selected.url);
   }
 
   async fileDownload(url) {
+    const fileResolution = await this.currentFileResolution();
+    console.log("currentResolution", fileResolution);
     const prepareUrl = {
       url,
-      fileResolution: 360,
+      fileResolution,
       fileResolutionTag: this.manifestJSON.fileResolutionTag,
       hostTag: this.manifestJSON.hostTag,
     };
