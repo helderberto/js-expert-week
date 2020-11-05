@@ -1,9 +1,12 @@
 class VideoMediaPlayer {
-  constructor({ manifestJSON, network }) {
-    this.videoElement = null;
-    this.sourceBuffer = null;
+  constructor({ manifestJSON, network, videoComponent }) {
     this.manifestJSON = manifestJSON;
     this.network = network;
+    this.videoComponent = videoComponent;
+
+    this.videoElement = null;
+    this.sourceBuffer = null;
+    this.activeItem = {};
     this.select = {};
     this.videoDuration = 0;
   }
@@ -38,7 +41,20 @@ class VideoMediaPlayer {
       // Evita rodar como "LIVE"
       mediaSource.duration = this.videoDuration;
       await this.fileDownload(selected.url);
+      setInterval(this.waitForQuestions.bind(this), 200);
     };
+  }
+
+  waitForQuestions() {
+    const currentTime = parseInt(this.videoElement.currentTime);
+    const option = this.selected.at === currentTime;
+    if (!option) return;
+
+    // it avoids to re-open modal twice times
+    if (this.activeItem.url === this.selected.url) return;
+
+    this.videoComponent.configureModal(this.selected.options);
+    this.activeItem = this.selected;
   }
 
   async fileDownload(url) {
