@@ -57,6 +57,19 @@ class VideoMediaPlayer {
     this.activeItem = this.selected;
   }
 
+  async nextChunk(data) {
+    const key = data.toLowerCase();
+    const selected = this.manifestJSON[key];
+    this.selected = {
+      ...selected,
+      // adjust the time to open the modal based in the current time
+      at: parseInt(this.videoElement.currentTime + selected.at),
+    };
+
+    this.videoElement.play();
+    await this.fileDownload(selected.url);
+  }
+
   async fileDownload(url) {
     const prepareUrl = {
       url,
@@ -73,7 +86,7 @@ class VideoMediaPlayer {
   setVideoPlayerDuration(finalURL) {
     const bars = finalURL.split("/");
     const [name, videoDuration] = bars[bars.length - 1].split("-");
-    this.videoDuration += videoDuration;
+    this.videoDuration += parseFloat(videoDuration);
   }
 
   async processBufferSegments(allSegments) {
