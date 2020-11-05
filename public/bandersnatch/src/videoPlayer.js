@@ -9,6 +9,7 @@ class VideoMediaPlayer {
     this.activeItem = {};
     this.select = {};
     this.videoDuration = 0;
+    this.selections = [];
   }
 
   initializeCodec() {
@@ -77,10 +78,20 @@ class VideoMediaPlayer {
       // adjust the time to open the modal based in the current time
       at: parseInt(this.videoElement.currentTime + selected.at),
     };
+    this.manageLag(this.selected);
 
     // run video when download is running in background
     this.videoElement.play();
     await this.fileDownload(selected.url);
+  }
+
+  manageLag(selected) {
+    if (!!~this.selections.indexOf(selected.url)) {
+      selected.at += 5;
+      return;
+    }
+
+    this.selections.push(selected.url);
   }
 
   async fileDownload(url) {
